@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DogsPH — Listening &amp; Activation Dashboard · SOMIN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#2DBF9C;--teal-d:#1F8A70;--teal-l:#7FE0C8;--teal-wash:#12332E;
+    --bg:#16201F;--card:#1F2A29;--card-2:#1B2524;--border:#2A3635;--border-2:#33403E;
+    --white:#FFFFFF;--body:#C9D1D0;--soft:#9BA8A6;
+    --font:'Montserrat',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;--shell:1240px;
+  }
+  *{box-sizing:border-box;min-width:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--body);font-family:var(--font);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  img,svg{max-width:100%;display:block} a{color:inherit}
+  ::selection{background:var(--teal);color:var(--bg)}
+  h1,h2,h3,p{overflow-wrap:anywhere;word-break:break-word}
+
+  /* NAV */
+  .nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:10px 14px;
+    padding:calc(15px + env(safe-area-inset-top)) clamp(16px,4vw,32px) 15px;
+    background:rgba(22,32,31,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:9px;min-width:0}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);flex:none}
+  .mark{font-weight:800;font-size:1.1rem;letter-spacing:-.02em;white-space:nowrap}
+  .mark .so{color:var(--teal)} .mark .min{color:var(--white)}
+  .sub{color:var(--soft);font-size:.74rem;font-weight:500;min-width:0}
+  .sub .pipe{color:rgba(255,255,255,.22);padding:0 8px}
+  @media(max-width:520px){.sub{font-size:.66rem;flex-basis:100%}.sub .pipe{padding:0 6px}}
+
+  .shell{max-width:var(--shell);margin:0 auto;padding:0 clamp(16px,4vw,32px) 90px}
+
+  /* VIEW TOGGLE (segmented) + view mechanism */
+  .vtoggle{display:inline-flex;flex-wrap:wrap;gap:6px;border:1px solid var(--border-2);border-radius:999px;padding:5px;margin:clamp(18px,3vw,26px) 0 2px;max-width:100%}
+  .vt{font-family:inherit;font-weight:600;font-size:.82rem;background:transparent;border:none;color:var(--body);padding:10px 18px;border-radius:999px;cursor:pointer;transition:.15s;min-height:42px}
+  .vt:hover:not(.active){color:var(--white)}
+  .vt.active{background:var(--teal);color:var(--bg)}
+  @media(max-width:420px){.vtoggle{width:100%;border-radius:16px}.vt{flex:1 1 auto}}
+  .view{display:none}
+  .view.active{display:block;animation:fadeIn .25s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+  /* HERO */
+  .hero{margin:0 calc(-1*clamp(16px,4vw,32px));padding:clamp(34px,6vw,52px) clamp(16px,4vw,32px) clamp(28px,4.5vw,40px);
+    background:linear-gradient(180deg,var(--teal-wash) 0%,var(--bg) 84%)}
+  .eyebrow{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 16px}
+  h1{font-weight:800;font-size:clamp(1.85rem,7vw,3.7rem);line-height:1.06;letter-spacing:-.02em;color:var(--white);margin:0 0 18px;max-width:20ch}
+  .lede{font-size:clamp(.95rem,2.6vw,1.05rem);color:var(--body);max-width:70ch;line-height:1.55}
+  .lede b{color:var(--white);font-weight:600}
+  .readme{margin-top:14px;font-size:.82rem;color:var(--soft);max-width:78ch;line-height:1.5}
+  .readme .k{color:var(--teal-l);font-weight:600}
+
+  /* KPI RULE */
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-top:clamp(24px,4vw,34px)}
+  .kpi .k{padding:20px clamp(14px,2.5vw,20px);border-right:1px solid var(--border)}
+  .kpi .k:last-child{border-right:none}
+  .kpi .n{font-weight:900;font-size:clamp(1.9rem,6vw,2.5rem);line-height:1;color:var(--teal);letter-spacing:-.02em}
+  .kpi .l{margin-top:8px;font-size:.63rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--soft)}
+  @media(max-width:520px){.kpi{grid-template-columns:1fr 1fr}.kpi .k{border-bottom:1px solid var(--border)}.kpi .k:nth-child(2n){border-right:none}}
+
+  .sec-label{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:clamp(28px,4vw,40px) 0 14px}
+
+  /* PERSPECTIVES: legend + cloud panels */
+  .howto{display:flex;flex-wrap:wrap;gap:10px 18px;margin:clamp(22px,3vw,32px) 0 4px;font-size:.76rem;color:var(--soft)}
+  .howto .item{display:inline-flex;align-items:center;gap:8px}
+  .swatch{width:13px;height:13px;border-radius:4px;flex:none}
+  .swatch.cl{background:var(--teal)} .swatch.sg{background:#5c6a68}
+  .cluster-eg{color:var(--teal);font-weight:600}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+  .grid>*{min-width:0}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:clamp(16px,2.6vw,22px);min-width:0;display:flex;flex-direction:column}
+  .panel-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+  .panel-hd .kick{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);font-weight:600}
+  .panel-hd h2{margin:5px 0 0;color:var(--white);font-weight:700;font-size:clamp(1.05rem,3.6vw,1.2rem);letter-spacing:-.01em}
+  .panel-hd .cnt{text-align:right;color:var(--soft);font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;flex:none}
+  .panel-hd .cnt b{display:block;color:var(--teal);font-weight:900;font-size:clamp(1.3rem,4vw,1.6rem);letter-spacing:-.02em}
+  .note{color:var(--soft);font-size:.82rem;line-height:1.5;margin:0 0 14px}
+  .cloud{line-height:1.95;overflow-wrap:anywhere}
+  .cloud .term{margin-right:.5ch;white-space:normal;transition:color .15s}
+  .cloud .cl{color:var(--teal);font-weight:700;cursor:pointer;border-bottom:1px dotted rgba(45,191,156,.7)}
+  .cloud .cl:hover{color:var(--teal-l)}
+  .cloud .cl:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:3px}
+  .cloud .sg{color:var(--body)}
+  .cloud .w5{font-size:clamp(1.35rem,4.6vw,1.9rem);font-weight:700}
+  .cloud .w4{font-size:clamp(1.18rem,3.9vw,1.55rem);font-weight:600}
+  .cloud .w3{font-size:clamp(1.04rem,3.3vw,1.22rem)}
+  .cloud .w2{font-size:clamp(.94rem,2.9vw,1.02rem)}
+  .cloud .w1{font-size:clamp(.82rem,2.5vw,.9rem)}
+  .cloud .sg.w3{color:#c4cccb} .cloud .sg.w2{color:#9ba8a6} .cloud .sg.w1{color:#7f8c8a}
+  .panel-ft{border-top:1px solid var(--border);margin-top:14px;padding-top:11px;font-size:.66rem;color:var(--soft);line-height:1.6}
+
+  /* INSIGHTS: matrix */
+  .mx-legend,.mx-row{display:grid;grid-template-columns:.82fr 1fr 1fr 1fr;gap:8px}
+  .mx-row{margin-bottom:8px}
+  .mx-h{background:var(--card);border:1px solid var(--border-2);border-radius:11px;padding:11px 12px;color:var(--white);font-weight:700;font-size:.8rem;line-height:1.2}
+  .mx-h .s{display:block;color:var(--soft);font-weight:500;font-size:.63rem;margin-top:5px;text-transform:uppercase;letter-spacing:.07em}
+  .mx-p{background:var(--card);border:1px solid var(--border-2);border-radius:11px;padding:11px 12px;color:var(--white);font-weight:700;font-size:.8rem;line-height:1.2;display:flex;flex-direction:column;justify-content:center}
+  .mx-p .c{color:var(--teal-l);font-weight:500;font-size:.63rem;margin-top:5px}
+  .cell{display:flex;flex-direction:column;gap:6px;text-decoration:none;background:var(--card-2);border:1px solid var(--border);border-radius:11px;padding:12px;min-height:64px;transition:.16s;justify-content:center}
+  .cell:hover{border-color:var(--teal);background:var(--teal-wash);transform:translateY(-1px)}
+  .cell .pn{font-weight:800;color:var(--teal);font-size:.9rem}
+  .cell .tn{display:none;color:var(--soft);font-size:.66rem;text-transform:uppercase;letter-spacing:.05em}
+  .cell .pm{color:var(--soft);font-size:.64rem}
+  @media(max-width:760px){.mx-legend{display:none}
+    .mx-row{grid-template-columns:1fr;gap:7px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+    .mx-p{flex-direction:row;align-items:baseline;gap:8px}.mx-p .c{margin-top:0}
+    .cell{flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;min-height:0}.cell .tn{display:block;flex:1}}
+
+  /* INSIGHTS: persona filter */
+  .seg{display:inline-flex;flex-wrap:wrap;gap:6px;border:1px solid var(--border-2);border-radius:999px;padding:5px;margin:clamp(26px,4vw,36px) 0 6px;max-width:100%}
+  .seg button{font-family:inherit;font-weight:600;font-size:.78rem;background:transparent;border:none;color:var(--body);padding:9px 15px;border-radius:999px;cursor:pointer;transition:.15s;min-height:40px}
+  .seg button:hover:not(.active){color:var(--white)}
+  .seg button.active{background:var(--teal);color:var(--bg)}
+  @media(max-width:420px){.seg{border-radius:16px}.seg button{flex:1 1 auto}}
+
+  /* INSIGHTS: persona card + pair card */
+  .persona{scroll-margin-top:82px;margin-top:24px}
+  .pcard{border:1px solid var(--border-2);border-radius:16px;padding:clamp(20px,3.5vw,26px);margin-bottom:14px;background:linear-gradient(160deg,var(--teal-wash),var(--card-2));position:relative;overflow:hidden}
+  .pcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--teal)}
+  .pcard .top{display:flex;align-items:baseline;gap:10px 14px;flex-wrap:wrap}
+  .pcard h2{margin:0;color:var(--white);font-weight:800;font-size:clamp(1.35rem,4vw,1.6rem);letter-spacing:-.01em}
+  .pcard .sz{color:var(--teal);font-weight:700;font-size:.78rem;letter-spacing:.04em}
+  .pcard .ch{color:var(--teal-l);font-weight:600;font-size:.84rem;margin-top:6px}
+  .pcard .ch .id{color:var(--soft);font-weight:500;font-size:.66rem;letter-spacing:.03em;text-transform:uppercase}
+  .pcard p{margin:11px 0 0;color:var(--body);font-size:.9rem;line-height:1.55;max-width:88ch}
+  .pair{border:1px solid var(--border);background:var(--card-2);border-radius:16px;margin-bottom:14px;overflow:hidden}
+  .ph{padding:clamp(15px,2.5vw,19px) clamp(16px,2.6vw,22px);border-bottom:1px solid var(--border);background:var(--card);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .ph .tt{margin:0;color:var(--white);font-weight:700;font-size:1.02rem;letter-spacing:-.01em}
+  .ph .ts{margin-top:5px;color:var(--soft);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+  .ph .rt{display:flex;flex-direction:column;align-items:flex-end;gap:7px;text-align:right}
+  .audit{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.6rem;color:var(--soft);line-height:1.5}
+  .pill{display:inline-flex;align-items:center;gap:6px;border-radius:7px;padding:6px 11px;font-weight:600;font-size:.66rem;letter-spacing:.02em;white-space:nowrap;text-transform:uppercase;border:1px solid}
+  .mp-emotional{background:var(--teal-wash);color:var(--teal-l);border-color:var(--teal-d)}
+  .mp-seasonal{background:rgba(31,138,112,.16);color:#9fe6cf;border-color:var(--teal-d)}
+  .mp-life{background:transparent;color:var(--white);border-color:var(--border-2)}
+  .pbody{display:grid;grid-template-columns:1.12fr 1fr;gap:0}
+  @media(max-width:840px){.pbody{grid-template-columns:1fr}}
+  .col{padding:clamp(16px,2.6vw,20px) clamp(16px,2.6vw,22px)}
+  .col.ins{border-right:1px solid var(--border)}
+  @media(max-width:840px){.col.ins{border-right:none;border-bottom:1px solid var(--border)}}
+  .col h3{margin:0 0 13px;font-size:.66rem;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);font-weight:700}
+  .col h3 .c{color:var(--soft);font-weight:600}
+  .itile{width:100%;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 15px;margin-bottom:11px;cursor:pointer;transition:.15s;font-family:inherit;color:inherit;display:block}
+  .itile:last-child{margin-bottom:0}
+  .itile:hover{transform:translateY(-1px);border-color:var(--teal-d)}
+  .itile:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .itile .ih{color:var(--white);font-weight:700;font-size:.97rem;line-height:1.32;margin:0}
+  .itile .meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .tag{font-size:.57rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:6px;white-space:nowrap}
+  .t-psychological{background:var(--teal-wash);color:var(--teal-l)}
+  .t-sociological{background:rgba(31,138,112,.2);color:#a7e2d2}
+  .t-behavioural_economic{background:rgba(127,224,200,.13);color:#bfeee0}
+  .itile .open{margin-left:auto;font-size:.64rem;color:var(--teal);font-weight:600;white-space:nowrap}
+  .itile .theory{width:100%;font-size:.7rem;color:var(--soft);margin:7px 0 0}
+  .mom{display:flex;gap:11px;padding-bottom:12px;margin-bottom:12px;border-bottom:1px dashed var(--border)}
+  .mom:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+  .bullet{flex:none;width:15px;height:15px;border-radius:50%;border:2px solid var(--teal);margin-top:3px;position:relative}
+  .bullet::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--teal)}
+  .mom .mn{color:var(--white);font-weight:600;font-size:.89rem;line-height:1.32}
+  .subpill{display:inline-block;margin-left:7px;font-size:.55rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);vertical-align:middle;white-space:nowrap}
+  .mom .ml{margin:5px 0 0;color:var(--soft);font-size:.8rem;line-height:1.45}
+  .mom .ml.q{font-style:italic;color:var(--body)}
+
+  /* SHARED DIALOG base */
+  .backdrop{position:fixed;inset:0;background:rgba(8,14,13,.76);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px;z-index:200}
+  .backdrop.open,.backdrop.on{display:flex;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal{width:min(560px,94vw);max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--border-2);border-left:4px solid var(--teal);border-radius:16px;padding:clamp(20px,4vw,26px);animation:rise .22s ease;-webkit-overflow-scrolling:touch}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  /* PERSPECTIVES dialog inner */
+  .m-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;position:sticky;top:-2px;background:var(--card);padding-bottom:2px}
+  .m-kick{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin-bottom:8px}
+  .m-top h3{margin:0;color:var(--white);font-weight:800;font-size:clamp(1.2rem,4.4vw,1.5rem);line-height:1.2;letter-spacing:-.01em}
+  .m-meta{margin-top:8px;display:flex;gap:6px 10px;flex-wrap:wrap;font-size:.72rem;color:var(--soft)}
+  .m-meta b{color:var(--teal-l)}
+  .close{flex:none;width:38px;height:38px;border-radius:9px;border:1px solid var(--border-2);background:var(--card-2);color:var(--white);font-size:1.05rem;cursor:pointer;line-height:1}
+  .m-summary{margin:16px 0;color:var(--body);font-size:.92rem;line-height:1.55}
+  .concepts{display:grid;grid-template-columns:1fr 1fr;gap:15px 18px}
+  @media(max-width:520px){.concepts{grid-template-columns:1fr}}
+  .crow{min-width:0}
+  .clabel{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:7px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:.72rem;background:var(--teal-wash);color:var(--teal-l);border:1px solid var(--teal-d);border-radius:7px;padding:4px 9px;line-height:1.25}
+  .chip.muted{background:transparent;color:var(--soft);border-color:var(--border-2)}
+
+  /* INSIGHTS dialog inner (namespaced) */
+  .close2{position:sticky;top:0;float:right;width:38px;height:38px;border-radius:9px;border:1px solid var(--border-2);background:var(--card-2);color:var(--white);font-size:1.1rem;cursor:pointer;line-height:1;margin-left:12px}
+  .eb{font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 44px 12px 0}
+  .mt{color:var(--white);font-weight:800;font-size:clamp(1.2rem,4.4vw,1.5rem);line-height:1.2;margin:0 0 12px;letter-spacing:-.01em}
+  .frame{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .theory2{font-size:.74rem;color:var(--soft)}
+  .block{margin-bottom:16px}
+  .block .lab{font-size:.62rem;letter-spacing:.13em;text-transform:uppercase;color:var(--teal);font-weight:700;margin:0 0 6px}
+  .block p{margin:0;color:var(--body);font-size:.9rem;line-height:1.55}
+  .stmt{background:var(--card-2);border:1px solid var(--border);border-radius:11px;padding:14px 16px;color:var(--white);font-size:.96rem;line-height:1.4;font-weight:600}
+  .mfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:14px;margin-top:4px}
+  .mfoot .story2{font-size:.72rem;color:var(--soft);font-style:italic}
+  .mfoot a{font-size:.74rem;font-weight:700;color:var(--teal);text-decoration:none;white-space:nowrap}
+  .mfoot a:hover{color:var(--teal-l)}
+
+  /* FOOTER */
+  .pagefoot{border-top:1px solid var(--border);padding:26px clamp(16px,4vw,32px) calc(26px + env(safe-area-inset-bottom));
+    display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;color:var(--soft);font-size:.72rem;max-width:var(--shell);margin:0 auto}
+  .pagefoot .mk{font-weight:800;font-size:1rem}
+  .pagefoot .mk .so{color:var(--teal)} .pagefoot .mk .min{color:var(--white)}
+  .pagefoot .rt{max-width:660px}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="brand">
+    <span class="dot"></span>
+    <span class="mark"><span class="so">SO</span><span class="min">MIN</span></span>
+    <span class="sub"><span class="pipe">|</span>DogsPH Listening &amp; Activation<span class="pipe">·</span>r/DogsPH</span>
+  </div>
+</nav>
+<main class="shell">
+  <div class="vtoggle" id="vtoggle" role="tablist" aria-label="Dashboard views">
+    <button class="vt active" data-v="persp" role="tab" aria-selected="true">Perspectives</button>
+    <button class="vt" data-v="ins" role="tab" aria-selected="false">Insights &amp; Moments</button>
+  </div>
+
+  <!-- ============ VIEW 1: PERSPECTIVES ============ -->
+  <section class="view active" id="v-persp" role="tabpanel">
+    <div class="hero">
+      <p class="eyebrow">Perspective Study · Audience Listening</p>
+      <h1>What the r/DogsPH community is really talking about.</h1>
+      <p class="lede">Four analytical lenses on the <b>DogsPH subreddit</b>. Each panel is a weighted word cloud: <b>strategic clusters</b> the engine named from the conversation — tap any one to open its full concept breakdown — sit over <b>signal terms</b> sized by how often the community actually mentioned them.</p>
+    </div>
+    <div class="kpi">
+      <div class="k"><div class="n">1,120</div><div class="l">Posts &amp; comments analysed</div></div>
+      <div class="k"><div class="n">9</div><div class="l">Audience personas</div></div>
+      <div class="k"><div class="n">10</div><div class="l">Narrative tensions</div></div>
+      <div class="k"><div class="n">10</div><div class="l">Strategic propositions</div></div>
+    </div>
+    <div class="howto">
+      <span class="item"><span class="swatch cl"></span> <span class="cluster-eg">Strategic cluster</span> — tap to open</span>
+      <span class="item"><span class="swatch sg"></span> Signal term — sized by mention volume</span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <!-- ============ VIEW 2: INSIGHTS & MOMENTS ============ -->
+  <section class="view" id="v-ins" role="tabpanel">
+    <div class="hero">
+      <p class="eyebrow">Insight &amp; Moment Engine · DogsPH Reddit Group</p>
+      <h1>Nine ways into the r/DogsPH conversation.</h1>
+      <p class="lede">The three biggest audience <b>personas</b> crossed with the three strongest narrative <b>tensions</b> — a 3 × 3 matrix. Each cell carries its own list of <b>strategic insights</b> and its own list of <b>timing moments</b>. Tap any insight to open its full breakdown.</p>
+      <p class="readme"><span class="k">Seasonal note:</span> the calendar dates below are globally-observed anchors from the engine — validate local Philippine anchors (rainy-season stray surges, local adoption fairs) before scheduling.</p>
+    </div>
+    <div class="kpi">
+      <div class="k"><div class="n">3 × 3</div><div class="l">Persona × tension pairs</div></div>
+      <div class="k"><div class="n">27</div><div class="l">Strategic insights</div></div>
+      <div class="k"><div class="n">45</div><div class="l">Timing triggers</div></div>
+      <div class="k"><div class="n">9 + 9</div><div class="l">Insight &amp; moment lists</div></div>
+    </div>
+    <p class="sec-label">The matrix — tap a cell to jump</p>
+    <div id="matrix"></div>
+    <div class="seg" id="seg">
+      <button class="active" data-f="all">All personas</button>
+      <button data-f="57079">Compassionate Caregiver</button>
+      <button data-f="57075">Community Advocate</button>
+      <button data-f="57080">Nurturing Companion</button>
+    </div>
+    <div id="report"></div>
+  </section>
+</main>
+<footer class="pagefoot">
+  <span class="mk"><span class="so">SO</span><span class="min">MIN</span></span>
+  <span class="rt"><b>Source:</b> Reddit · r/DogsPH &nbsp;·&nbsp; Study “DogsPH Reddit Group” (id 7368) · Workspace 3725 &nbsp;·&nbsp; Format: Diageo Foresight 2.0, re-skinned in SOMIN</span>
+  <span>somin.ai</span>
+</footer>
+<!-- Perspectives concept dialog -->
+<div class="backdrop" id="backdrop" role="dialog" aria-modal="true" aria-labelledby="m-title">
+  <div class="modal" id="modal">
+    <div class="m-top">
+      <div>
+        <div class="m-kick" id="m-kick"></div>
+        <h3 id="m-title"></h3>
+        <div class="m-meta" id="m-meta"></div>
+      </div>
+      <button class="close" id="m-close" aria-label="Close">✕</button>
+    </div>
+    <p class="m-summary" id="m-summary"></p>
+    <div class="concepts" id="m-concepts"></div>
+  </div>
+</div>
+
+<!-- Insights concept dialog (namespaced) -->
+<div class="backdrop" id="bd" role="dialog" aria-modal="true">
+  <div class="modal imodal" id="imodal">
+    <button class="close2" id="x" aria-label="Close">✕</button>
+    <p class="eb" id="m-eb"></p>
+    <h3 class="mt" id="i-title"></h3>
+    <div class="frame"><span class="tag" id="m-tag"></span><span class="theory2" id="m-theory"></span></div>
+    <div class="block"><p class="lab">The signal in the data</p><p id="m-desc"></p></div>
+    <div class="block"><p class="lab">Why it works</p><p id="m-app"></p></div>
+    <div class="block"><p class="lab">The insight</p><div class="stmt" id="m-sum"></div></div>
+    <div class="mfoot"><span class="story2" id="m-story"></span><a id="m-link" target="_blank" rel="noopener">View live story ↗</a></div>
+  </div>
+</div>
+<script>
+/* ---------------- DATA (from SOMIN Perspective Study 7368, workspace DogsPH) ---------------- */
+const CONCEPT_ORDER = [
+  ["audiences","Inferred audiences"],
+  ["interests","Interests"],
+  ["need","Customer need"],
+  ["aspirations","Aspirations"],
+  ["emotions","Emotions"],
+  ["tone","Tone of voice"],
+  ["brands","Brand mentions"],
+  ["media","Media / topics"]
+];
+
+const LENSES = [
+{
+  kick:"Lens 01 · Who they are", title:"Audience personas",
+  count:"9", countLbl:"personas",
+  note:"Named audience clusters the engine reverse-engineered from the community, floating over the inferred-audience signals that describe who shows up.",
+  footer:"<b>Read:</b> a caregiving, community-minded audience — pet owners and animal lovers first, budget-watchers and foodies at the edges.",
+  clusters:[
+    {name:"The Compassionate Caregiver", w:5, meta:["226 members","Largest persona"],
+      summary:"A deep love for pets, family and community welfare. Interests run from pet care to family activities; the pull is toward strong family bonds, fulfilling relationships and a sense of belonging — with connection, support and affection as the core needs.",
+      c:{audiences:["Pet Owners","Pet Lovers","Animal Lovers","Families"],interests:["Pet Care","Family Activities","Animal Welfare"],need:["Connection","Support","Affection"],aspirations:["Strong Family Bonds","Fulfilling Relationships","Community Belonging"],emotions:["Love","Affection","Compassion"],tone:["Supportive","Compassionate","Warm"],brands:["Pedigree"],media:["Pets","Family & Friends","Community Engagement"]}},
+    {name:"The Community Advocate", w:5, meta:["226 members","2 sub-clusters merged"],
+      summary:"Passionate about pet care, animal welfare and community support, aiming to make a positive impact through volunteering and donations. Driven by a need for connection and empathy, and a desire to bridge gaps within the community around justice, compassion and belonging.",
+      c:{audiences:["Animal Welfare Advocates","Community Supporters","Volunteers","Advocates"],interests:["Animal Welfare","Community Support","Volunteering","Activism"],need:["Community","Justice","Compassion","Belonging"],aspirations:["Social Impact","Purposeful Life","Positive Impact"],emotions:["Empathy","Compassion","Concern","Hope"],tone:["Supportive","Urgent","Compassionate"],brands:["Pedigree","Strays to Oasis","PAWS"],media:["Community Engagement","CSR","Social Problem"]}},
+    {name:"The Nurturing Companion", w:4, meta:["138 members"],
+      summary:"A passionate pet owner who prioritises the health and well-being of their pets while striving for a balanced life. Interests centre on pet care, healthy living for pets and humans, dog training and cooking; essential needs are knowledge about pet health, emotional support and assurance of safety.",
+      c:{audiences:["Pet Owners","Health-Conscious Individuals","Dog Owners"],interests:["Pet Care","Healthy Lifestyle","Dog Training","Nutrition"],need:["Knowledge","Health & Wellness","Safety","Support"],aspirations:["Healthy Lifestyle","Strong Family Bonds","Personal Growth"],emotions:["Concern","Hope","Trust"],tone:["Supportive","Informative","Concerned"],brands:["Pedigree","Royal Canin","Bravecto"],media:["Health & Wellness","Pets"]}},
+    {name:"The Heartfelt Companion", w:4, meta:["133 members"],
+      summary:"A nurturing individual passionate about pet care and forming deep connections with animals and people alike. Interests lie in the love and companionship of pets — especially dogs and cute animals — with heartfelt needs for affection, connection and belonging.",
+      c:{audiences:["Pet Lovers","Dog Lovers","Animal Lovers"],interests:["Pet Care","Dogs","Cute Animals","Animal Companionship"],need:["Affection","Connection","Belonging"],aspirations:["Fulfilling Relationships","Community Belonging"],emotions:["Love","Affection","Joy","Warmth"],tone:["Affectionate","Playful","Warm"],brands:["Pedigree"],media:["Pets","Family & Friends"]}},
+    {name:"The Compassionate Caretaker", w:4, meta:["80 members"],
+      summary:"Commitment to pet care and health, balanced with affordability and financial stability. Leverages promotions and community initiatives to enhance living; needs security, support and affection while prioritising the health and happiness of loved ones.",
+      c:{audiences:["Budget-Conscious Individuals","Pet Owners","Bargain Hunters"],interests:["Pet Care","Savings","Financial Stability","Promos"],need:["Security","Support","Affection","Knowledge"],aspirations:["Financial Stability","Peace of Mind","Strong Family Bonds"],emotions:["Concern","Hope","Comfort"],tone:["Supportive","Humble","Informative"],brands:["Pedigree","Shopee","Lazada"],media:["Promos","Retail","Health & Wellness"]}},
+    {name:"The Affectionate Adventurer", w:3, meta:["67 members"],
+      summary:"A passion for pet care, family activities and humour. Thrives on family bonding and a love for nature, travel and photography; needs connection and affection reflected in enriching experiences with pets and loved ones.",
+      c:{audiences:["Pet Lovers","Nature Lovers","Travelers","Families"],interests:["Pet Care","Nature","Traveling","Photography","Humor"],need:["Connection","Affection","Love"],aspirations:["Fulfilling Relationships","Happiness","Life Balance"],emotions:["Happiness","Affection","Amusement","Excitement"],tone:["Playful","Humorous","Warm"],brands:["Pedigree"],media:["Pets","Family & Friends","Travel"]}},
+    {name:"The Caring Guardian", w:3, meta:["21 members"],
+      summary:"A devoted individual who prioritises family, financial stability and pet care, seeking a balanced life filled with humour and affection while valuing community connections. Aspirations revolve around financial health and fulfilling relationships.",
+      c:{audiences:["Families","Pet Owners","Budget-Conscious Individuals"],interests:["Family Activities","Financial Stability","Pet Care","Humor"],need:["Security","Support","Comfort"],aspirations:["Financial Stability","Fulfilling Relationships","Life Balance"],emotions:["Affection","Concern","Amusement"],tone:["Humble","Supportive","Humorous"],brands:["Pedigree"],media:["Family & Friends","Finance","Pets"]}},
+    {name:"The Serene Family Advocate", w:3, meta:["14 members"],
+      summary:"A deep commitment to family, health and community engagement. Cherishes family activities and healthy living; aspirations focus on personal happiness and restful experiences, with needs for comfort, connection and belonging met through festive gatherings and self-care.",
+      c:{audiences:["Families","Health-Conscious Individuals","Community Members"],interests:["Family Activities","Healthy Lifestyle","Health & Wellness","Events"],need:["Comfort","Connection","Belonging"],aspirations:["Life Balance","Happiness","Strong Family Bonds"],emotions:["Happiness","Comfort","Warmth"],tone:["Warm","Reflective","Supportive"],brands:["Pedigree"],media:["Festive & Holidays","Family & Friends","Health & Wellness"]}},
+    {name:"The Heartfelt Explorer", w:3, meta:["12 members"],
+      summary:"A vibrant personality with a strong emphasis on family, food culture and humour. Cooking, baking and enjoying food are integral; aspires to personal fulfilment and sophistication while fostering belonging and affection among friends and family.",
+      c:{audiences:["Foodies","Pet Lovers","Families"],interests:["Food Culture","Family Activities","Humor","Fashion"],need:["Comfort","Connection","Belonging"],aspirations:["Personal Fulfillment","Happiness","Fulfilling Relationships"],emotions:["Happiness","Curiosity","Amusement"],tone:["Playful","Curious","Warm"],brands:["Pedigree","Oreo"],media:["Food Culture","Pets","Family & Friends"]}}
+  ],
+  signals:[
+    ["Pet Owners",896],["Pet Lovers",360],["General Public",324],["Animal Lovers",222],["Community Supporters",190],["Dog Lovers",159],["Community Members",157],["Families",129],["Animal Welfare Advocates",125],["Health-Conscious Individuals",84],["Dog Owners",49],["Budget-Conscious",46],["Volunteers",43],["Socially Conscious",36],["Foodies",28],["Charity Supporters",27],["New Pet Owners",24],["Bargain Hunters",19],["Donors",18],["Travelers",17],["Nature Lovers",16],["Advocates",15]
+  ]
+},
+{
+  kick:"Lens 02 · What moves them", title:"Narrative tensions",
+  count:"10", countLbl:"tensions",
+  note:"The emotional currents running under the conversation. Named tension clusters sit over the emotions the community expressed, sized by frequency.",
+  footer:"<b>Read:</b> hope, gratitude and love dominate — but concern, worry and anxiety mark the health-and-rescue conversations where the brand can help.",
+  clusters:[
+    {name:"Caring for Pets: the emotional journey", w:5, meta:["286 items","Strongest tension"],
+      summary:"The emotional and financial challenge of keeping pets healthy. Owners seek guidance, reliable information and community support to navigate pet ownership — especially in health crises or when faced with conflicting advice — willing to invest time and money despite budget constraints.",
+      c:{audiences:["Pet Owners","Budget-Conscious Individuals","Health-Conscious Individuals"],interests:["Pet Care","Animal Health","Veterinary Medicine","Nutrition"],need:["Knowledge","Support","Security","Health & Wellness"],aspirations:["Responsible Pet Ownership","Peace of Mind","Healthy Lifestyle"],emotions:["Concern","Worry","Hope","Anxiety"],tone:["Supportive","Concerned","Informative"],brands:["Pedigree","Royal Canin","Bravecto","NexGard","Apoquel"],media:["Health & Wellness","Pets"]}},
+    {name:"Empathy & action: support for vulnerable animals", w:4, meta:["150 items"],
+      summary:"A strong emotional response to vulnerable animals in distress. Witnessing suffering evokes empathy and responsibility; members are motivated to help when given clear calls to action and easy ways to contribute, driving collective action against cruelty and neglect.",
+      c:{audiences:["Animal Welfare Advocates","Community Supporters","Donors"],interests:["Animal Welfare","Animal Rescue","Donations","Activism"],need:["Compassion","Community","Justice","Validation"],aspirations:["Social Impact","Positive Impact","Equality and Justice"],emotions:["Empathy","Compassion","Sadness","Urgency"],tone:["Urgent","Compassionate","Supportive"],brands:["Pedigree","Strays to Oasis","PAWS"],media:["Community Engagement","CSR","Social Problem"]}},
+    {name:"The joy of pet companionship", w:4, meta:["141 items"],
+      summary:"The profound joy, comfort and emotional fulfilment people derive from their pets. Simple interactions, shared moments and playful antics foster connection and belonging, enriching lives and strengthening family bonds.",
+      c:{audiences:["Pet Lovers","Dog Lovers","Animal Lovers"],interests:["Pet Care","Dogs","Cute Animals","Bonding"],need:["Connection","Affection","Comfort","Belonging"],aspirations:["Happiness","Fulfilling Relationships"],emotions:["Joy","Love","Happiness","Warmth"],tone:["Playful","Affectionate","Warm"],brands:["Pedigree"],media:["Pets","Family & Friends"]}},
+    {name:"The deep bonds between pets & families", w:4, meta:["139 items"],
+      summary:"Pets viewed as integral family members. People celebrate their pets' milestones, include them in family activities and go to great lengths for their happiness and health — a familial bond filled with affection, concern and the desire for shared experiences.",
+      c:{audiences:["Pet Owners","Families","Pet Lovers"],interests:["Pet Care","Family Activities","Bonding","Dogs"],need:["Affection","Connection","Belonging","Support"],aspirations:["Strong Family Bonds","Fulfilling Relationships"],emotions:["Love","Affection","Concern","Joy"],tone:["Affectionate","Supportive","Warm"],brands:["Pedigree"],media:["Pets","Family & Friends"]}},
+    {name:"The profound bond: pets as family", w:4, meta:["139 items"],
+      summary:"Deep emotional connections that drive people to go to great lengths for their pets' welfare, especially in illness or distress. A shared human experience of love, responsibility and the support sought from communities in difficult moments.",
+      c:{audiences:["Pet Owners","Community Members","Families"],interests:["Pet Care","Animal Health","Community Support"],need:["Support","Love","Security","Community"],aspirations:["Peace of Mind","Strong Family Bonds","Responsible Pet Ownership"],emotions:["Love","Concern","Hope","Sadness"],tone:["Supportive","Compassionate","Concerned"],brands:["Pedigree","Royal Canin"],media:["Pets","Health & Wellness","Community Engagement"]}},
+    {name:"Compassion in action: supporting beloved pets", w:4, meta:["97 items"],
+      summary:"Deep emotional connections and a willingness to help animals in need — a strong sense of community compassion, transparency, and a desire to positively impact vulnerable creatures when there is a clear appeal and a visible outcome.",
+      c:{audiences:["Community Supporters","Animal Lovers","Donors"],interests:["Community Support","Animal Welfare","Donations","Charity"],need:["Compassion","Community","Trust","Validation"],aspirations:["Positive Impact","Making a Positive Impact","Social Impact"],emotions:["Compassion","Hope","Gratitude","Empathy"],tone:["Supportive","Hopeful","Grateful"],brands:["Pedigree","Strays to Oasis"],media:["Community Engagement","CSR","Charity"]}},
+    {name:"The joy of pet parenthood: personality & humour", w:3, meta:["75 items"],
+      summary:"Owners express affection, humour and relatable experiences through the quirky behaviour of their animals. Anthropomorphism casts pets as extensions of the family — mirroring human emotions, creating laughter and a shared sense of joy among pet lovers.",
+      c:{audiences:["Pet Lovers","Dog Lovers","General Public"],interests:["Humor","Cute Animals","Animal Behavior","Pets"],need:["Connection","Affection","Humor"],aspirations:["Happiness","Fulfilling Relationships"],emotions:["Amusement","Joy","Relatability","Love"],tone:["Humorous","Playful","Relatable"],brands:["Pedigree"],media:["Humor","Pets","Pop Culture"]}},
+    {name:"The power of connection & comfort", w:3, meta:["42 items"],
+      summary:"Simple gestures, familiar treats and moments of relaxation evoke joy and belonging. From celebrating milestones to lighthearted interactions, individuals seek warmth and acknowledgement in both personal and communal settings.",
+      c:{audiences:["General Public","Pet Owners","Community Members"],interests:["Family Time","Food Culture","Bonding"],need:["Comfort","Connection","Belonging","Validation"],aspirations:["Happiness","Life Balance"],emotions:["Comfort","Warmth","Joy","Nostalgia"],tone:["Warm","Playful","Reflective"],brands:["Pedigree","Oreo"],media:["Family & Friends","Festive & Holidays","Food Culture"]}},
+    {name:"Navigating life's challenges", w:3, meta:["39 items"],
+      summary:"From health emergencies to parenting anxieties, people seek reassurance and reliable information. A communal drive to help and uplift one another persists despite personal struggles, with clear guidance in decision-making a recurring need.",
+      c:{audiences:["General Public","Community Support Seekers","Families"],interests:["Health & Wellness","Community Support","Safety"],need:["Support","Knowledge","Security","Problem Solving"],aspirations:["Peace of Mind","Life Balance","Personal Growth"],emotions:["Anxiety","Worry","Hope","Relief"],tone:["Supportive","Concerned","Humble"],brands:["Pedigree"],media:["Health & Wellness","Community Engagement","Social Problem"]}},
+    {name:"The joy of shared moments with pets", w:3, meta:["9 items"],
+      summary:"Joy and motivation from shared activities — outdoor adventures or simple indoor pleasures. These experiences highlight connection and quality time with beloved animals as life returns to a more vibrant social landscape.",
+      c:{audiences:["Pet Lovers","Nature Lovers","Travelers"],interests:["Nature","Traveling","Family Activities","Photography"],need:["Connection","Comfort","Belonging"],aspirations:["Happiness","Life Balance","Fulfilling Relationships"],emotions:["Excitement","Joy","Happiness","Anticipation"],tone:["Playful","Warm","Curious"],brands:["Pedigree"],media:["Pets","Travel","Family & Friends"]}}
+  ],
+  signals:[
+    ["Hope",717],["Gratitude",509],["Love",484],["Affection",449],["Connection",369],["Happiness",329],["Compassion",298],["Concern",285],["Empathy",274],["Joy",171],["Amusement",169],["Curiosity",150],["Relatability",141],["Comfort",138],["Sadness",122],["Anxiety",100],["Warmth",98],["Worry",86],["Frustration",75],["Trust",74],["Excitement",63],["Urgency",63],["Relief",54],["Anticipation",46],["Nostalgia",38]
+  ]
+},
+{
+  kick:"Lens 03 · What to say", title:"Strategic propositions",
+  count:"10", countLbl:"propositions",
+  note:"Message territories the engine surfaced from what already resonates. Named propositions sit over the interests the community is actively into.",
+  footer:"<b>Read:</b> community + care beats hard-sell — support, welfare and the joy of the bond are the strongest ground to own.",
+  clusters:[
+    {name:"Caring communities: supporting pet owners", w:5, meta:["375 items","Biggest territory"],
+      summary:"Build a compassionate community around pet owners, offering resources and support for both pets' health and the emotional challenges of ownership. Advocate responsible care, educate on welfare, connect pet lovers, and rally community action for pets in need.",
+      c:{audiences:["Pet Owners","Community Supporters","Animal Welfare Advocates"],interests:["Pet Care","Community Support","Animal Welfare","Health & Wellness"],need:["Support","Community","Knowledge","Belonging"],aspirations:["Community Belonging","Responsible Pet Ownership","Positive Impact"],emotions:["Compassion","Hope","Support","Empathy"],tone:["Supportive","Compassionate","Hopeful"],brands:["Pedigree"],media:["Community Engagement","Health & Wellness","Pets"]}},
+    {name:"Embracing the joyful bonds of pet ownership", w:4, meta:["279 items"],
+      summary:"An affectionate understanding of the pet–owner bond, celebrating everyday moments that highlight pets' unique personalities and the love they bring. Encourages recognition of the joy and challenges of ownership and fosters belonging among pet lovers.",
+      c:{audiences:["Pet Lovers","Dog Lovers","Families"],interests:["Pet Care","Dogs","Cute Animals","Humor"],need:["Affection","Connection","Belonging"],aspirations:["Happiness","Fulfilling Relationships","Community Belonging"],emotions:["Joy","Love","Affection","Amusement"],tone:["Playful","Affectionate","Warm"],brands:["Pedigree"],media:["Pets","Family & Friends","Humor"]}},
+    {name:"Community care for pets in need", w:4, meta:["138 items"],
+      summary:"A strong sense of community focused on supporting pet well-being — facilitating medical assistance, promoting responsible ownership, engaging in rescue and encouraging collective support during crises through collaboration and care.",
+      c:{audiences:["Animal Welfare Advocates","Community Supporters","Donors"],interests:["Animal Welfare","Animal Rescue","Donations","Volunteering"],need:["Community","Compassion","Support","Justice"],aspirations:["Social Impact","Positive Impact","Purposeful Life"],emotions:["Compassion","Empathy","Hope","Urgency"],tone:["Urgent","Compassionate","Supportive"],brands:["Pedigree","Strays to Oasis","PAWS"],media:["Community Engagement","CSR","Charity"]}},
+    {name:"Nourishing bonds: the trusted choice for dogs", w:3, meta:["41 items"],
+      summary:"A comprehensive range of high-quality pet food and accessories prioritising health, happiness and well-being. Emphasises affordability, specialised diets, nutrition and reliable recommendations — for puppies and multi-pet homes — while staying budget-friendly.",
+      c:{audiences:["Pet Owners","New Pet Owners","Budget-Conscious Individuals"],interests:["Pet Care","Dog Food","Nutrition","Puppies"],need:["Health & Wellness","Knowledge","Security","Trust"],aspirations:["Healthy Lifestyle","Responsible Pet Ownership","Financial Stability"],emotions:["Trust","Concern","Hope"],tone:["Informative","Supportive","Warm"],brands:["Pedigree","Royal Canin","Besh Pet"],media:["Pets","Retail","Health & Wellness"]}},
+    {name:"Empowering pet health choices", w:3, meta:["28 items"],
+      summary:"Reliable, affordable and effective pet-health solutions — flea, tick and deworming treatments plus nutritional supplements — built on community trust, vet recommendations and cost management so owners can make informed decisions.",
+      c:{audiences:["Pet Owners","Health-Conscious Individuals","Budget-Conscious Individuals"],interests:["Animal Health","Veterinary Medicine","Nutrition","Savings"],need:["Knowledge","Health & Wellness","Security","Trust"],aspirations:["Peace of Mind","Healthy Lifestyle","Responsible Pet Ownership"],emotions:["Concern","Trust","Hope"],tone:["Informative","Supportive","Concerned"],brands:["Pedigree","Bravecto","NexGard","Apoquel"],media:["Health & Wellness","Pets","Retail"]}},
+    {name:"Paw-sitive impact: transforming lives with every donation", w:3, meta:["25 items"],
+      summary:"Even modest contributions significantly improve the lives of rescued animals — providing food, medical care and hope. Messages highlight the direct impact of donors' kindness in easing the burden on rescuers.",
+      c:{audiences:["Donors","Charity Supporters","Community Supporters"],interests:["Donations","Animal Rescue","Charity","Animal Welfare"],need:["Compassion","Community","Validation","Trust"],aspirations:["Positive Impact","Making a Positive Impact","Social Impact"],emotions:["Compassion","Hope","Gratitude","Relief"],tone:["Hopeful","Grateful","Urgent"],brands:["Pedigree","Strays to Oasis"],media:["CSR","Charity","Community Engagement"]}},
+    {name:"Celebrating the pet-human bond", w:3, meta:["12 items"],
+      summary:"Services and products that facilitate travel, care and enjoyment for pets in everyday life — emphasising convenience, compassion and community engagement across health, well-being, leisure and travel.",
+      c:{audiences:["Pet Owners","Travelers","Pet Lovers"],interests:["Pet Care","Traveling","Family Activities"],need:["Comfort","Connection","Support"],aspirations:["Life Balance","Fulfilling Relationships","Happiness"],emotions:["Affection","Joy","Comfort"],tone:["Warm","Supportive","Playful"],brands:["Pedigree","Pet Express"],media:["Pets","Travel","Family & Friends"]}},
+    {name:"Unite for animal justice", w:3, meta:["12 items"],
+      summary:"Community involvement in combating animal cruelty and advocating welfare — a call for compassion, accountability and urgent responses to protect animals in need, encouraging change through education and advocacy.",
+      c:{audiences:["Animal Welfare Advocates","Advocates","Socially Conscious Consumers"],interests:["Animal Welfare","Activism","Community Support"],need:["Justice","Compassion","Community","Dignity"],aspirations:["Equality and Justice","Social Impact","Purposeful Life"],emotions:["Anger","Empathy","Urgency","Compassion"],tone:["Urgent","Serious","Compassionate"],brands:["Pedigree","PAWS"],media:["Social Problem","CSR","Social Issues"]}},
+    {name:"Joyful connections: family & companionship", w:3, meta:["10 items"],
+      summary:"The family, companionship and joy pets bring — the close pet–owner relationship, the excitement of welcoming a new pet, and joyful shared experiences. A friendly, approachable image built on connection, fun quizzes and culinary adventures.",
+      c:{audiences:["Families","New Pet Owners","Pet Lovers"],interests:["Family Activities","Pet Care","Food Culture","Humor"],need:["Connection","Affection","Belonging"],aspirations:["Happiness","Strong Family Bonds","Fulfilling Relationships"],emotions:["Joy","Happiness","Affection","Anticipation"],tone:["Playful","Friendly","Warm"],brands:["Pedigree"],media:["Family & Friends","Pets","Food Culture"]}},
+    {name:"Paws for a cause: join the rescue movement", w:3, meta:["4 items"],
+      summary:"An urgent need for support and donations for rescue animals in critical situations. Community involvement is the ask — contribute through donations or by supporting local rescue organisations — grounded in compassion and the value of a loving home.",
+      c:{audiences:["Donors","Community Supporters","Charity Supporters"],interests:["Animal Rescue","Donations","Charity","Animal Welfare"],need:["Compassion","Community","Support","Justice"],aspirations:["Positive Impact","Social Impact","Purposeful Life"],emotions:["Urgency","Compassion","Hope","Desperation"],tone:["Urgent","Compassionate","Hopeful"],brands:["Pedigree","Strays to Oasis","Cats of Brixton Place"],media:["CSR","Charity","Community Engagement"]}}
+  ],
+  signals:[
+    ["Pet Care",1095],["Community Support",434],["Animal Welfare",238],["Family Activities",188],["Health & Wellness",183],["Dogs",158],["Healthy Lifestyle",126],["Volunteering",102],["Savings",81],["Animal Health",49],["Adoption",39],["Humor",39],["Veterinary Medicine",34],["Donations",33],["Nature",32],["Cute Animals",28],["Puppies",19],["Dog Food",17],["Promos",15],["Nutrition",14],["Animal Rescue",13],["Charity",12]
+  ]
+},
+{
+  kick:"Lens 04 · Needs, aspirations & voice", title:"Community register",
+  count:"—", countLbl:"signal cloud",
+  note:"The complement to the three lenses above: what the community says it needs, what it aspires to, and the tone it speaks in. Teal north-stars are the strongest strategic anchors; click for detail.",
+  footer:"<b>Read:</b> connection and support are the deepest needs; the voice is informal, supportive and hopeful — never corporate.",
+  clusters:[
+    {name:"Connection", w:5, meta:["862 mentions","#1 expressed need"],
+      summary:"Connection is the single strongest expressed need across r/DogsPH — members reach for belonging through their pets and through each other. It threads the caregiving personas and the companionship tensions alike.",
+      c:{audiences:["Pet Owners","Pet Lovers","Families"],interests:["Pet Care","Family Activities","Bonding"],need:["Connection","Support","Belonging"],aspirations:["Fulfilling Relationships","Strong Family Bonds","Community Belonging"],emotions:["Love","Affection","Warmth"],tone:["Supportive","Warm","Affectionate"],brands:["Pedigree"],media:["Pets","Family & Friends","Community Engagement"]}},
+    {name:"Support", w:5, meta:["695 mentions","#2 expressed need"],
+      summary:"A pervasive need to give and receive support — practical (health guidance, cost help) and emotional (reassurance in a crisis). It is the connective tissue of the community's caregiving and rescue conversations.",
+      c:{audiences:["Community Supporters","Pet Owners","Community Support Seekers"],interests:["Community Support","Pet Care","Animal Welfare"],need:["Support","Knowledge","Community","Security"],aspirations:["Peace of Mind","Community Belonging","Positive Impact"],emotions:["Hope","Compassion","Concern"],tone:["Supportive","Hopeful","Compassionate"],brands:["Pedigree"],media:["Community Engagement","Health & Wellness","CSR"]}},
+    {name:"Strong Family Bonds", w:4, meta:["518 mentions","#1 aspiration"],
+      summary:"The community's top aspiration: pets treated as family, and family life strengthened through them. Milestones, gatherings and shared care all ladder up to this bond.",
+      c:{audiences:["Families","Pet Owners","Pet Lovers"],interests:["Family Activities","Pet Care","Bonding"],need:["Affection","Connection","Belonging"],aspirations:["Strong Family Bonds","Fulfilling Relationships","Happiness"],emotions:["Love","Affection","Joy"],tone:["Affectionate","Warm","Supportive"],brands:["Pedigree"],media:["Family & Friends","Pets","Festive & Holidays"]}},
+    {name:"Fulfilling Relationships", w:4, meta:["415 mentions","#2 aspiration"],
+      summary:"Beyond family, a broad reach for meaningful relationships — with pets, friends and the wider community — as a source of happiness and belonging.",
+      c:{audiences:["Pet Lovers","Families","Community Members"],interests:["Bonding","Family Activities","Pet Care"],need:["Connection","Affection","Belonging"],aspirations:["Fulfilling Relationships","Happiness","Community Belonging"],emotions:["Love","Happiness","Warmth"],tone:["Warm","Affectionate","Playful"],brands:["Pedigree"],media:["Family & Friends","Pets"]}},
+    {name:"Community Belonging", w:4, meta:["302 mentions","#4 aspiration"],
+      summary:"A desire to belong to something larger — the rescue movement, the pet-owner community, the welfare cause. It powers the advocacy personas and the community-care propositions.",
+      c:{audiences:["Community Supporters","Animal Welfare Advocates","Volunteers"],interests:["Community Support","Volunteering","Animal Welfare"],need:["Belonging","Community","Compassion"],aspirations:["Community Belonging","Purposeful Life","Social Impact"],emotions:["Hope","Compassion","Empathy"],tone:["Supportive","Hopeful","Compassionate"],brands:["Pedigree","PAWS"],media:["Community Engagement","CSR"]}},
+    {name:"Belonging", w:3, meta:["284 mentions","Core need"],
+      summary:"Alongside connection and support, belonging recurs as a base need — the feeling of being seen and included, whether by other members or by the brands that show up for the community.",
+      c:{audiences:["Community Members","Pet Lovers","General Public"],interests:["Community Support","Pet Care","Family Time"],need:["Belonging","Connection","Validation"],aspirations:["Community Belonging","Fulfilling Relationships"],emotions:["Warmth","Comfort","Hope"],tone:["Warm","Supportive","Relatable"],brands:["Pedigree"],media:["Community Engagement","Family & Friends","Pets"]}}
+  ],
+  signals:[
+    ["Affection",578],["Love",576],["Security",234],["Health & Wellness",216],["Community",177],["Comfort",126],["Knowledge",112],["Hope",111],["Compassion",81],["Safety",78],["Trust",47],["Validation",45],["Happiness",316],["Purposeful Life",222],["Healthy Lifestyle",183],["Positive Impact",106],["Financial Stability",88],["Life Balance",68],["Personal Growth",37],["Peace of Mind",30],["Informal",767],["Supportive",733],["Compassionate",495],["Hopeful",400],["Playful",286],["Humorous",154],["Urgent",117],["Humble",92],["Warm",46],["Informative",31]
+  ]
+}
+];
+
+/* ---------------- WEIGHTING ---------------- */
+function bucket(n,max){const r=n/max;if(r>=0.60)return 5;if(r>=0.35)return 4;if(r>=0.18)return 3;if(r>=0.08)return 2;return 1;}
+
+/* ---------------- RENDER ---------------- */
+const grid=document.getElementById('grid');
+LENSES.forEach((lens,li)=>{
+  const maxSig=Math.max(...lens.signals.map(s=>s[1]));
+  // interleave named clusters and signals into one cloud; named first (they read on top)
+  const parts=[];
+  lens.clusters.forEach((c,ci)=>{
+    parts.push(`<span class="term cl w${c.w}" data-l="${li}" data-c="${ci}" tabindex="0" role="button">${c.name}</span>`);
+  });
+  lens.signals.forEach(s=>{
+    const w=bucket(s[1],maxSig);
+    parts.push(`<span class="term sg w${w}">${s[0]}</span>`);
+  });
+  const panel=document.createElement('section');
+  panel.className='panel';
+  panel.innerHTML=`
+    <div class="panel-hd">
+      <div><div class="kick">${lens.kick}</div><h2>${lens.title}</h2></div>
+      <div class="cnt"><b>${lens.count}</b>${lens.countLbl}</div>
+    </div>
+    <div class="note">${lens.note}</div>
+    <div class="cloud">${parts.join('')}</div>
+    <div class="panel-ft">${lens.footer}</div>`;
+  grid.appendChild(panel);
+});
+
+/* ---------------- DIALOG ---------------- */
+const backdrop=document.getElementById('backdrop');
+const mKick=document.getElementById('m-kick'), mTitle=document.getElementById('m-title'),
+      mMeta=document.getElementById('m-meta'), mSummary=document.getElementById('m-summary'),
+      mConcepts=document.getElementById('m-concepts');
+let lastFocus=null;
+
+function openModal(li,ci){
+  const lens=LENSES[li], c=lens.clusters[ci];
+  lastFocus=document.activeElement;
+  mKick.textContent=lens.title;
+  mTitle.textContent=c.name;
+  mMeta.innerHTML=c.meta.map((m,i)=> i===0?`<span><b>${m}</b></span>`:`<span>${m}</span>`).join('');
+  mSummary.textContent=c.summary;
+  mConcepts.innerHTML=CONCEPT_ORDER.map(([key,label])=>{
+    const vals=c.c[key]||[];
+    const chips=vals.length? vals.map(v=>`<span class="chip">${v}</span>`).join('')
+                           : `<span class="chip muted">—</span>`;
+    return `<div class="crow"><div class="clabel">${label}</div><div class="chips">${chips}</div></div>`;
+  }).join('');
+  backdrop.classList.add('open');
+  document.getElementById('m-close').focus();
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  backdrop.classList.remove('open');
+  document.body.style.overflow='';
+  if(lastFocus) lastFocus.focus();
+}
+grid.addEventListener('click',e=>{
+  const t=e.target.closest('.cl'); if(!t)return;
+  openModal(+t.dataset.l,+t.dataset.c);
+});
+grid.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('cl')){
+    e.preventDefault(); openModal(+e.target.dataset.l,+e.target.dataset.c);
+  }
+});
+document.getElementById('m-close').addEventListener('click',closeModal);
+backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&backdrop.classList.contains('open'))closeModal();});
+</script>
+<script>
+const STUDY=7368, STORY=id=>`https://cloud.somin.ai/app/inspire/insights/story/${id}`;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const typeLabel=t=>t==='behavioural_economic'?'Behavioural-Economic':t.charAt(0).toUpperCase()+t.slice(1);
+
+const PERSONAS=[
+ {id:57079,name:"The Compassionate Caregiver",char:"Emma Heartwood",charId:1312,size:226,
+  blurb:"Deep love for pets, family and community welfare. Core needs: connection, support, affection and belonging — the warm, go-to caregiver of the community."},
+ {id:57075,name:"The Community Advocate",char:"Lila Hartman",charId:1311,size:201,
+  blurb:"Animal-welfare organiser — runs rescues, adoption drives and wellness events. Core needs: support, connection, community and validation."},
+ {id:57080,name:"The Nurturing Companion",char:"Harper Finnley",charId:1313,size:138,
+  blurb:"Holistic pet-health believer; runs a pet-care blog and works in veterinary medicine. Core needs: pet-health knowledge, emotional support and safety."}
+];
+const TENSIONS=[
+ {id:57086,title:"Caring for Pets: The Emotional Journey",short:"Emotional Journey of Care",size:286,moment:"emotional",angles:[15012,15017,15023]},
+ {id:57085,title:"Empathy & Action: Mobilizing Support for Vulnerable Animals",short:"Empathy & Action",size:150,moment:"seasonal",angles:[14997,15003,15007]},
+ {id:57087,title:"The Joy of Pet Companionship",short:"Joy of Companionship",size:141,moment:"life",angles:[15027,15030,15039]}
+];
+// angle detail (signal + theory application) — shared across personas
+const ANGLES={
+ 15012:{reason:"Emotional Attachment",theory:"Attachment Theory",type:"psychological",desc:"Owners form deep emotional bonds with their pets, viewing them as family — which drives their concern for health and well-being.",app:"Strong emotional bonds shape behaviour and decisions. Owners prioritise their pet's needs and seek community support and advice to ensure their well-being."},
+ 15017:{reason:"Social Identity & Belonging",theory:"Social Identity Theory",type:"sociological",desc:"Owners identify with a community of fellow pet owners, which fosters belonging and a shared identity that motivates them to seek support.",app:"People derive a sense of self from group membership. Identifying as a pet-lover, owners seek validation and support, reinforcing commitment to their pet."},
+ 15023:{reason:"Loss Aversion",theory:"Prospect Theory",type:"behavioural_economic",desc:"Owners are driven by the fear of losing their pet's health, leading them to seek advice and solutions that prevent negative outcomes.",app:"People feel potential losses more than equivalent gains. Fearing loss, owners actively seek information and community support to reduce risk and safeguard their pets."},
+ 14997:{reason:"Empathy toward suffering",theory:"Empathy-Altruism",type:"psychological",desc:"People naturally empathise with the suffering of vulnerable animals, feeling a deep connection that compels them to act.",app:"Empathetic feeling motivates helping. When people perceive suffering, that emotional pull moves them to take action."},
+ 15003:{reason:"Collective Identity & Solidarity",theory:"Social Identity Theory",type:"sociological",desc:"People feel belonging and shared identity with groups that champion animal welfare, motivating collective action for vulnerable animals.",app:"Identity comes from the groups we join. Identifying with a welfare community, people take the actions that express that identity — like helping animals in need."},
+ 15007:{reason:"Perceived Efficacy of Contributions",theory:"Self-Efficacy Theory",type:"behavioural_economic",desc:"People help more when they believe their contribution can lead to real change, especially for vulnerable animals.",app:"Belief in one's own capability drives motivation. When people feel their effort makes a visible difference, they're far more inclined to contribute."},
+ 15027:{reason:"Need for Affection",theory:"Maslow's Hierarchy",type:"psychological",desc:"Humans have an intrinsic need for affection and connection, which pets fulfil through unconditional love and companionship.",app:"Love and belonging are fundamental needs. Pets offer non-judgmental affection, helping people feel loved and connected."},
+ 15030:{reason:"Social Connection",theory:"Social Identity Theory",type:"psychological",desc:"Owning pets creates social bonds among owners, fostering community and belonging.",app:"People draw identity from social groups. Sharing pet experiences strengthens social ties and deepens belonging."},
+ 15039:{reason:"Validation through Social Sharing",theory:"Social Validation Theory",type:"behavioural_economic",desc:"Sharing pet milestones on social media provides validation and connection, enhancing joy and belonging.",app:"People seek validation from peers. Sharing pet content earns positive feedback that reinforces the bond between owners and their communities."}
+};
+
+const PAIRS={
+ "57079_57086":{momentId:1352,insights:[
+   {id:1928,h:"Attachment transforms worry into strength.",story:"The Weight of Fur",sum:"Emotional bonds turn moments of distress into a felt sense of community and shared support — resilience through connection."},
+   {id:1930,h:"Connection through compassion joins hearts beyond boundaries.",story:"The Compassionate Canvas",sum:"Embracing community and sharing struggles turns challenges into bonds of connection."},
+   {id:1931,h:"Love breeds resilience, while fear ignites connection.",story:"A Heartwood's Promise",sum:"Faced with potential loss, the need for connection grows stronger — fear becomes a catalyst for community and support."}],
+  moments:[
+   {mn:"A Moment of Helplessness During a Pet's Illness",t:"Frustration",q:1,l:"I can't believe this is happening; I need to find help fast."},
+   {mn:"Seeking Community Support for Pet Care",t:"Belonging",q:1,l:"I hope someone has been through this and can guide me."},
+   {mn:"The Guilt of Financial Constraints",t:"Regret",q:1,l:"I wish I could afford the best treatment for my pet."},
+   {mn:"The Joy of a Successful Recovery",t:"Triumph",q:1,l:"I'm so relieved; I knew we could get through this together."},
+   {mn:"The Anxiety of New Pet Ownership",t:"Longing",q:1,l:"I hope I'm doing everything right for my new furry friend."}]},
+ "57079_57085":{momentId:1355,insights:[
+   {id:1932,h:"Compassion without clarity can lead to chaos.",story:"The Fur and the Feather",sum:"True empathy needs a balanced approach; understanding limits makes altruism more effective and purposeful."},
+   {id:1933,h:"Compassion ignites the flames of collective action.",story:"A Circle of Hearts",sum:"When communities unite around a shared purpose, empathy becomes powerful action that empowers people and vulnerable lives alike."},
+   {id:1934,h:"Belief in small actions can ignite monumental change.",story:"The Echo of Compassion",sum:"When people see their contribution as meaningful, they act — creating a ripple of community compassion."}],
+  moments:[
+   {mn:"National Pet Day",t:"Apr 11 · Observance",l:"Show love for pets and help those in need — adoption + shelter support."},
+   {mn:"World Animal Day",t:"Oct 4 · Global",l:"Advocate for animal rights; rescue and welfare drives."},
+   {mn:"Adopt a Shelter Dog Month",t:"October",l:"Rally the community to adopt from shelters, not shops."},
+   {mn:"Giving Tuesday",t:"Post-Thanksgiving",l:"Year-end day of giving — donate to animal-rescue orgs."},
+   {mn:"Pawtoberfest",t:"October · Festival",l:"Pet-friendly festival: parades and shelter fundraising."}]},
+ "57079_57087":{momentId:1358,insights:[
+   {id:1935,h:"You cannot pour from an empty cup.",story:"The Silent Shrieks of Greta",sum:"Self-care and self-love are prerequisites for healthy connection; mutual affection must be nurtured to thrive."},
+   {id:1936,h:"Joy multiplies when shared, especially through love's simplest gestures.",story:"The Ties That Bind",sum:"Connections formed through shared pet-care experiences enrich life and deepen belonging."},
+   {id:1937,h:"Joy blooms in shared moments.",story:"The Paws of Connection",sum:"Happiness emerges from weaving experiences into shared lives — a community bound by validation and joy."}],
+  moments:[
+   {mn:"Welcoming a new pet into the family",t:"Family milestone",l:"Create a loving home where the family shares joy with a new companion."},
+   {mn:"Volunteering at an animal shelter",t:"Personal growth",l:"Give back and find purpose alongside like-minded people."},
+   {mn:"Organizing a family pet-themed event",t:"Family milestone",l:"A pet parade or fundraiser to bond and make shared memories."},
+   {mn:"Adopting a rescue animal",t:"Family milestone",l:"Give an animal a second chance — fulfilment through compassion."},
+   {mn:"Community animal-welfare initiatives",t:"Community",l:"Join a movement; strengthen belonging and purpose."}]},
+ "57075_57086":{momentId:1351,insights:[
+   {id:1938,h:"Compassion for others begins with tending to oneself.",story:"The Weight of a Paw",sum:"Kindness radiates from self-care; to uplift others, first nurture your own spirit."},
+   {id:1939,h:"Belonging is found not only in company, but in shared compassion.",story:"The Society of Tender Hearts",sum:"The bond that ties us is the empathy we extend — individual struggles become collective strength."},
+   {id:1940,h:"Fear tethers us to care, but kindness frees us to act.",story:"The Weight of Whiskers",sum:"Protection often starts in fear of loss; real engagement comes from shifting to proactive compassion."}],
+  moments:[
+   {mn:"A Moment of Desperation",t:"Frustration",q:1,l:"I wish I could afford the best care for my pet without feeling guilty about the cost."},
+   {mn:"A Moment of Connection",t:"Belonging",q:1,l:"I feel so connected to everyone here; we all share the same love for our pets."},
+   {mn:"A Moment of Guilt",t:"Regret",q:1,l:"I can't help but feel like I'm letting my pet down."},
+   {mn:"A Moment of Relief",t:"Triumph",q:1,l:"We made it through this together — I knew I could count on my community."},
+   {mn:"A Moment of Anxiety",t:"Hope",q:1,l:"I just want to do right by my new pet; I hope I can find the answers I need."}]},
+ "57075_57085":{momentId:1354,insights:[
+   {id:1941,h:"Compassion turned into action can reshape communities.",story:"The Call of Compassion",sum:"Deep empathy ignites a collective drive for change — moving hearts and actions together."},
+   {id:1942,h:"Empathy ignites action, but vengeance tears apart what binds us.",story:"The Price of Compassion",sum:"Collective strength thrives on compassion, not conflict — methods must uplift rather than divide."},
+   {id:1943,h:"Change begins with a whisper of belief in our actions.",story:"The Whistle of Change",sum:"When people feel their contribution matters, they find courage to act — amplifying collective impact."}],
+  moments:[
+   {mn:"World Animal Day",t:"Oct 4 · Global",l:"Awareness events, fundraisers and education for animal welfare."},
+   {mn:"Adopt a Shelter Dog Month",t:"October",l:"Campaigns encouraging shelter adoption over buying."},
+   {mn:"National Volunteer Week",t:"April",l:"Connect volunteers to shelters and welfare initiatives."},
+   {mn:"Giving Tuesday",t:"Post-Thanksgiving",l:"Global day of giving — mobilise donations for animals."},
+   {mn:"Earth Day",t:"Apr 22",l:"Link animal welfare to environmental stewardship; clean-ups."}]},
+ "57075_57087":{momentId:1357,insights:[
+   {id:1944,h:"Affection thrives on balance; neglect yourself, and love will fade.",story:"The Unseen Cost of Unconditional Love",sum:"True affection asks us to nurture every part of ourselves, or we drain the source of our joy."},
+   {id:1945,h:"Connection grows where compassion thrives.",story:"The Echo of a Whistle",sum:"Belonging is nurtured in empathy and shared experience — little moments bind us, even across distance."},
+   {id:1946,h:"Joy expands when shared.",story:"The Paws of Connection",sum:"Moments of happiness flourish in community, reinforcing bonds through shared experiences."}],
+  moments:[
+   {mn:"Adopting a pet",t:"Family milestone",l:"A transformative step into companionship and responsibility."},
+   {mn:"Volunteering at an animal shelter",t:"Community",l:"Contribute to welfare while building community ties."},
+   {mn:"Organizing a community pet event",t:"Community",l:"Bring pet owners together; grow awareness and bonds."},
+   {mn:"A charity run for animal welfare",t:"Lifestyle",l:"Combine activity with philanthropy for animals."},
+   {mn:"Fostering a pet",t:"Family milestone",l:"Temporary care that prepares pets for adoption."}]},
+ "57080_57086":{momentId:1353,insights:[
+   {id:1947,h:"Love may bind us, but wisdom must guide us.",story:"The Cost of Love",sum:"Attachment drives care, but it must be tempered with discernment and informed choices to avoid hardship."},
+   {id:1948,h:"In nurturing others, we often discover ourselves.",story:"The Paws of Belonging",sum:"Investing in a companion's well-being builds a support network that enriches your own life; true wealth is relationships."},
+   {id:1949,h:"Fear often overshadows joy, yet living fully means embracing both.",story:"The Weight of Wags and Whiskers",sum:"Recognising the interplay of joy and fear deepens appreciation of life's fleeting moments."}],
+  moments:[
+   {mn:"A Moment of Overwhelm",t:"Frustration",q:1,l:"I don't know if I can handle this."},
+   {mn:"The Search for Reassurance",t:"Hope",q:1,l:"I hope someone has the answer I need."},
+   {mn:"The Weight of Responsibility",t:"Regret",q:1,l:"I should have been more proactive about their health."},
+   {mn:"Community Connection",t:"Belonging",q:1,l:"I feel like I finally found my tribe."},
+   {mn:"Navigating Financial Strain",t:"Frustration",q:1,l:"Why does caring for my pet have to be so expensive?"}]},
+ "57080_57085":{momentId:1356,insights:[
+   {id:1950,h:"Empathy ignites action; compassion solidifies change.",story:"Between Two Realms of Compassion",sum:"When compassion fuels action, we transform suffering into hope — a ripple of care beyond the individual."},
+   {id:1951,h:"Our strength is best realized in unity.",story:"Voices for the Voiceless",sum:"Shared values amplify impact, turning empathy into tangible action."},
+   {id:1952,h:"In the realm of compassion, belief begets action.",story:"The Tug of a Leash",sum:"When people see their contribution as impactful, they engage — belief in one's own ability fosters collective action."}],
+  moments:[
+   {mn:"National Pet Day",t:"Apr 11 · Observance",l:"Appreciate pets; support shelters and rescue orgs."},
+   {mn:"Adopt a Shelter Pet Month",t:"October",l:"Share adoption stories; advocate for rescue."},
+   {mn:"World Animal Day",t:"Oct 4 · Global",l:"Unite the community against cruelty; welfare drives."},
+   {mn:"Thanksgiving",t:"Nov · US-anchored",l:"Gratitude and generosity toward shelters."},
+   {mn:"Holiday Season Giving",t:"Dec · Christmas/New Year",l:"Donations and gifts; ensure animals feel loved for the holidays."}]},
+ "57080_57087":{momentId:1359,insights:[
+   {id:1953,h:"Affection is the bridge that connects us to one another.",story:"Paw Prints on My Heart",sum:"In unguarded companionship we discover our need for love and belonging; pets fill that void."},
+   {id:1954,h:"Connection grows in the shared space of affection.",story:"The Ties That Bind",sum:"Bonding over mutual love enriches relationships and builds community and identity."},
+   {id:1955,h:"Connection blooms in shared moments.",story:"The Paws of A New Moment",sum:"True connection lives in genuine shared experience, not merely curating it online."}],
+  moments:[
+   {mn:"Welcoming a new puppy into the home",t:"Family milestone",l:"New joys and responsibilities that strengthen family bonds."},
+   {mn:"Completing a dog training course",t:"Education",l:"Skills that deepen the owner–pet bond and build confidence."},
+   {mn:"Planning a family vacation with pets",t:"Family milestone",l:"Pet-friendly togetherness and shared experiences."},
+   {mn:"Adopting a rescue animal",t:"Personal growth",l:"A loving home for a pet in need; compassion in action."},
+   {mn:"Creating a pet-friendly home environment",t:"Lifestyle",l:"Adapting the home so pets thrive safely."}]}
+};
+
+const INS=[]; // dialog store
+
+/* MATRIX */
+(function(){
+  const el=document.getElementById('matrix');
+  let h=`<div class="mx-legend"><div class="mx-h">Persona ↓&nbsp; Tension →</div>`;
+  TENSIONS.forEach(t=>h+=`<div class="mx-h">${esc(t.short)}<span class="s">${t.size} items · ${t.moment}</span></div>`);
+  h+=`</div>`;
+  let n=0;
+  PERSONAS.forEach(p=>{
+    h+=`<div class="mx-row"><div class="mx-p">${esc(p.name)}<span class="c">${esc(p.char)} · ${p.size}</span></div>`;
+    TENSIONS.forEach(t=>{n++;
+      h+=`<a class="cell" href="#pair_${p.id}_${t.id}"><span class="pn">Pair ${n}</span>`+
+         `<span class="tn">${esc(t.short)}</span>`+
+         `<span class="pm">3 insights · 5 moments · <span style="color:var(--teal)">${t.moment}</span></span></a>`;
+    });
+    h+=`</div>`;
+  });
+  el.innerHTML=h;
+})();
+
+/* REPORT */
+(function(){
+  const root=document.getElementById('report');
+  let n=0,html='';
+  PERSONAS.forEach(p=>{
+    html+=`<section class="persona" data-p="${p.id}" id="persona_${p.id}">`;
+    html+=`<div class="pcard"><div class="top"><h2>${esc(p.name)}</h2><span class="sz">${p.size} in cohort</span></div>`+
+          `<div class="ch">Character: ${esc(p.char)} · <span class="id">persona ${p.id} → character ${p.charId}</span></div>`+
+          `<p>${esc(p.blurb)}</p></div>`;
+    TENSIONS.forEach(t=>{n++;
+      const d=PAIRS[`${p.id}_${t.id}`];
+      html+=`<div class="pair" id="pair_${p.id}_${t.id}">`+
+        `<div class="ph"><div><h3 class="tt">Pair ${n} · ${esc(p.name)} × ${esc(t.short)}</h3>`+
+        `<div class="ts">${esc(t.title)}</div></div>`+
+        `<div class="rt"><span class="pill mp-${t.moment}">${t.moment} moments</span>`+
+        `<div class="audit">persona ${p.id} · char ${p.charId}<br>tension ${t.id} · angles ${t.angles.join(', ')}<br>moment ${d.momentId} · study ${STUDY}</div></div></div>`;
+      html+=`<div class="pbody"><div class="col ins"><h3>Strategic insights <span class="c">— ${d.insights.length} · tap to open</span></h3>`;
+      d.insights.forEach((i,idx)=>{
+        const a=ANGLES[t.angles[idx]];
+        const k=INS.push({eb:`${p.name} × ${t.short} · ${typeLabel(a.type)} angle`,h:i.h,type:a.type,reason:a.reason,theory:a.theory,desc:a.desc,app:a.app,sum:i.sum,story:i.story,link:STORY(i.id)})-1;
+        html+=`<button class="itile" data-i="${k}"><p class="ih">${esc(i.h)}</p>`+
+          `<div class="meta"><span class="tag t-${a.type}">${typeLabel(a.type)}</span><span class="open">Open ↗</span></div>`+
+          `<p class="theory">${esc(a.reason)} · ${esc(a.theory)}</p></button>`;
+      });
+      html+=`</div><div class="col mom-col"><h3>Timing moments <span class="c">— 5 · ${t.moment}</span></h3>`;
+      d.moments.forEach(m=>{
+        html+=`<div class="mom"><span class="bullet"></span><div><div class="mn">${esc(m.mn)}<span class="subpill">${esc(m.t)}</span></div>`+
+          `<p class="ml ${m.q?'q':''}">${m.q?('&ldquo;'+esc(m.l)+'&rdquo;'):esc(m.l)}</p></div></div>`;
+      });
+      html+=`</div></div></div>`;
+    });
+    html+=`</section>`;
+  });
+  root.innerHTML=html;
+})();
+
+/* FILTER */
+document.getElementById('seg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  const f=b.dataset.f;
+  document.querySelectorAll('.persona').forEach(s=>s.classList.toggle('hide',!(f==='all'||s.dataset.p===f)));
+});
+
+/* DIALOG */
+const bd=document.getElementById('bd');
+function iOpen(i){
+  const d=INS[i];
+  document.getElementById('m-eb').textContent=d.eb;
+  document.getElementById('i-title').textContent=d.h;
+  const tg=document.getElementById('m-tag'); tg.textContent=typeLabel(d.type); tg.className='tag t-'+d.type;
+  document.getElementById('m-theory').textContent=d.reason+' · '+d.theory;
+  document.getElementById('m-desc').textContent=d.desc;
+  document.getElementById('m-app').textContent=d.app;
+  document.getElementById('m-sum').textContent=d.sum;
+  document.getElementById('m-story').textContent='Narrative: “'+d.story+'”';
+  document.getElementById('m-link').href=d.link;
+  bd.classList.add('on'); document.body.style.overflow='hidden';
+  document.getElementById('imodal').scrollTop=0;
+}
+function iClose(){bd.classList.remove('on'); document.body.style.overflow='';}
+document.getElementById('report').addEventListener('click',e=>{
+  const t=e.target.closest('.itile'); if(t) iOpen(+t.dataset.i);
+});
+document.getElementById('x').addEventListener('click',iClose);
+bd.addEventListener('click',e=>{if(e.target===bd)iClose();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&bd.classList.contains('on'))iClose();});
+</script>
+<script>
+/* ---------------- VIEW TOGGLE ---------------- */
+(function(){
+  const t=document.getElementById('vtoggle');
+  t.addEventListener('click',e=>{
+    const b=e.target.closest('.vt'); if(!b)return;
+    t.querySelectorAll('.vt').forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false');});
+    b.classList.add('active'); b.setAttribute('aria-selected','true');
+    const v=b.dataset.v;
+    document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.id==='v-'+v));
+    document.getElementById('backdrop').classList.remove('open');
+    document.getElementById('bd').classList.remove('on');
+    document.body.style.overflow='';
+    window.scrollTo(0,0);
+  });
+})();
+</script>
+
+</body>
+</html>
