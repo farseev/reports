@@ -1378,6 +1378,10 @@ ul.signal-bullets.sb-neutral li.signal-conclusion::before { color: var(--text-se
 
 /* --- card-header chip labels match the header colour ---------------------- */
 .ca-fcard-h .ca-fh-l { color:var(--text-secondary); }
+
+/* --- metric value and its gauge sit side by side -------------------------- */
+.bfm-vrow { display:flex; align-items:center; gap:7px; }
+.bfm-vrow > svg { flex:0 0 auto; display:block; }
 </style>
 </head>
 <body>
@@ -3186,9 +3190,9 @@ function buildCampaignAnalysis(id, camp, labels, currency) {
   const snap = camp.b1Snapshot || {};
 
   const pmCfg = primaryMetricConfig(obj);
-  const seasonality = computeSeasonality(b2, pmCfg.field);
+  const seasonality = computeSeasonality(b2, 'ctr');
   if (!camp.seasonality) camp.seasonality = seasonality;
-  const seasonalityHourly = computeSeasonalityHourly(camp.hourlySeries, pmCfg.field, b2.length);
+  const seasonalityHourly = computeSeasonalityHourly(camp.hourlySeries, 'ctr', b2.length);
   if (!camp.seasonalityHourly) camp.seasonalityHourly = seasonalityHourly;
   const seasonalityCollapsible = `
     <div class="seasonality-collapsible">
@@ -4033,7 +4037,7 @@ function gaugeSVG(val, bench, higher, bad){
     + `<line x1="20" y1="1.6" x2="20" y2="6.4" stroke="var(--text-secondary)" stroke-width="1.4" stroke-linecap="round"/>`
     + `</svg>`;
 }
-function bfmHTML(l,v,sub,bad,gauge){const cls=(bad===null||bad===undefined)?'':(bad?'ca-sub-bad':'ca-sub-good');const s=sub?`<span class="bfm-b">${sub}</span>`:'';const g=gauge?gauge:'';return `<div class="bfm"><span class="bfm-l">${l}</span><span class="bfm-v ${cls}">${v}</span>${g}${s}</div>`;}
+function bfmHTML(l,v,sub,bad,gauge){const cls=(bad===null||bad===undefined)?'':(bad?'ca-sub-bad':'ca-sub-good');const s=sub?`<span class="bfm-b">${sub}</span>`:'';const g=gauge?gauge:'';return `<div class="bfm"><span class="bfm-l">${l}</span><span class="bfm-vrow"><span class="bfm-v ${cls}">${v}</span>${g}</span>${s}</div>`;}
 function toggleAdsetCard(adsetId) {
   const panel = document.getElementById('ca-asbottom-' + adsetId);
   const card  = document.getElementById('ca-card-asbottom-' + adsetId);
